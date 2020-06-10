@@ -1,7 +1,7 @@
 package main
 
 import (
-	"trade-cli/cmd"
+	"github.com/halfbreak/trade-cli/cmd"
 )
 
 func main() {

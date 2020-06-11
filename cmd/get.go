@@ -6,9 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
-	mapset "github.com/deckarep/golang-set"
+	"github.com/halfbreak/trade-cli/model"
 	"github.com/spf13/cobra"
 )
 
@@ -20,16 +19,15 @@ var helloCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		currencyPairSlice := []interface{}{"btcusd", "btceur", "btcgbp", "btcpax", "gbpusd", "gbpeur", "eurusd", "xrpusd", "xrpeur", "xrpbtc", "xrpgbp", "xrppax", "ltcusd", "ltceur", "ltcbtc", "ltcgbp", "ethusd", "etheur", "ethbtc", "ethgbp", "ethpax", "bchusd", "bcheur", "bchbtc", "bchgbp", "paxusd", "paxeur", "paxgbp"}
-		currencyPairSet := mapset.NewSetFromSlice(currencyPairSlice)
 
-		if !currencyPairSet.Contains(args[0]) {
+		bitstamp := &model.Exchange{BaseURL: "https://www.bitstamp.net/api/v2/ticker/", CurrencyPairs: currencyPairSlice}
+
+		if bitstamp.IsInvalidCurrencyPair(args[0]) {
 			fmt.Println("Currency pair " + args[0] + " not recognized")
 			os.Exit(1)
 		}
 
-		fmt.Println("Getting " + strings.Join(args, " "))
-		fmt.Println("https://www.bitstamp.net/api/v2/ticker/" + args[0])
-		response, err := http.Get("https://www.bitstamp.net/api/v2/ticker/" + args[0])
+		response, err := http.Get(bitstamp.GetCurrencyPairURL(args[0]))
 
 		if err != nil {
 			fmt.Print(err.Error())

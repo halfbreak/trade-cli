@@ -9,11 +9,13 @@ import (
 	"time"
 
 	"github.com/halfbreak/trade-cli/model"
+	"github.com/halfbreak/trade-cli/services"
 	"github.com/spf13/cobra"
 )
 
 var Ticker bool
 var TickerTime int64
+var Output string
 
 // getCmd represents the get command
 var getCmd = &cobra.Command{
@@ -42,6 +44,7 @@ func init() {
 	// helloCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	getCmd.Flags().BoolVarP(&Ticker, "ticker", "t", false, "Turns the Get command into a ticker")
 	getCmd.Flags().Int64Var(&TickerTime, "tickerTime", 2, "Timer for the Get command ticker")
+	getCmd.Flags().StringVarP(&Output, "output", "o", services.OutputType[0], "Chooses the output for the Get command")
 }
 
 func getCurrency(currencyPair string, exchange model.Exchange) {
@@ -52,7 +55,6 @@ func getCurrency(currencyPair string, exchange model.Exchange) {
 	}
 
 	for {
-
 		response, err := http.Get(exchange.GetCurrencyPairURL(currencyPair))
 
 		if err != nil {
@@ -64,7 +66,8 @@ func getCurrency(currencyPair string, exchange model.Exchange) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(string(responseData))
+		var outputService services.OutputService = services.GetOutput(Output)
+		outputService.Write(string(responseData))
 
 		if !Ticker {
 			break

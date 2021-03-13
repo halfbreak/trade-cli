@@ -6,10 +6,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/halfbreak/trade-cli/model"
 	"github.com/spf13/cobra"
 )
+
+var Ticker bool
+var TickerTime int64
 
 // getCmd represents the get command
 var getCmd = &cobra.Command{
@@ -36,6 +40,8 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// helloCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	getCmd.Flags().BoolVarP(&Ticker, "ticker", "t", false, "Turns the Get command into a ticker")
+	getCmd.Flags().Int64Var(&TickerTime, "tickerTime", 2, "Timer for the Get command ticker")
 }
 
 func getCurrency(currencyPair string, exchange model.Exchange) {
@@ -45,16 +51,25 @@ func getCurrency(currencyPair string, exchange model.Exchange) {
 		os.Exit(1)
 	}
 
-	response, err := http.Get(exchange.GetCurrencyPairURL(currencyPair))
+	for {
 
-	if err != nil {
-		fmt.Print(err.Error())
-		os.Exit(1)
-	}
+		response, err := http.Get(exchange.GetCurrencyPairURL(currencyPair))
 
-	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			fmt.Print(err.Error())
+			os.Exit(1)
+		}
+
+		responseData, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(string(responseData))
+
+		if !Ticker {
+			break
+		} else {
+			time.Sleep(time.Duration(TickerTime) * time.Second)
+		}
 	}
-	fmt.Println(string(responseData))
 }

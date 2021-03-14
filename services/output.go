@@ -24,7 +24,7 @@ func (e *CommandLineOutputService) Write(value string) {
 
 func GetOutput(value string) OutputService {
 	if !IsValidOutput(value) {
-		fmt.Println("Output " + value + " not recognized")
+		fmt.Printf("Output %s not recognized. Choose one of: %v\n", value, OutputType)
 		os.Exit(1)
 	}
 
